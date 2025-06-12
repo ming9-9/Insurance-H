@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>고객 정보 추가</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    ::placeholder {
+      font-family: 'Noto Sans KR', sans-serif;
+      color: #aaa;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f18d00;
+      margin: 0;
+      padding: 30px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #000;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .form-container {
+      position: relative;
+      background: white;
+      padding: 30px 25px 60px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    textarea {
+      height: 80px;
+      resize: vertical;
+    }
+
+    .gender-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 5px;
+    }
+
+    .gender-btn {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      border-radius: 6px;
+      border: 2px solid #ccc;
+      background-color: #fff;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .gender-btn.active {
+      border-color: #003070;
+      background-color: #e6f0ff;
+      font-weight: bold;
+    }
+
+    .phone-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 5px;
+    }
+
+    .phone-group select,
+    .phone-group input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .btn-save {
+      margin-top: 30px;
+      padding: 15px;
+      width: 100%;
+      background-color: #f18d00;
+      color: white;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .btn-save:hover {
+      background-color: #003070;
+    }
+
+    .back-btn {
+      position: absolute;
+      bottom: 15px;
+      left: 25px;
+      font-size: 14px;
+      padding: 6px 14px;
+      color: #003070;
+      border: 1px solid #003070;
+      border-radius: 20px;
+      background-color: white;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .back-btn:hover {
+      background-color: #003070;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>고객 정보 추가</h1>
+  <div class="form-container">
+    <label>고객명</label>
+    <input type="text" id="name" placeholder="홍길동" />
+
+    <label>생년월일</label>
+    <input type="text" id="birth" placeholder="YYYY-MM-DD" />
+
+    <label>성별</label>
+    <div class="gender-group">
+      <div class="gender-btn" onclick="selectGender('남')">남</div>
+      <div class="gender-btn" onclick="selectGender('여')">여</div>
+    </div>
+
+    <label>연락처</label>
+    <div class="phone-group">
+      <select id="phone1">
+        <option value="010">010</option>
+        <option value="011">011</option>
+        <option value="016">016</option>
+        <option value="017">017</option>
+        <option value="018">018</option>
+        <option value="019">019</option>
+      </select>
+      -
+      <input type="text" id="phone2" maxlength="4" placeholder="1234"
+             oninput="validateNumber(this); moveFocus(this, 'phone3')" />
+      -
+      <input type="text" id="phone3" maxlength="4" placeholder="5678"
+             oninput="validateNumber(this)" />
+    </div>
+
+    <label>관심사</label>
+    <select id="interest">
+      <option value="">-- 관심사 선택 --</option>
+      <option value="암보험">암보험</option>
+      <option value="실손보험">실손보험</option>
+      <option value="치아보험">치아보험</option>
+      <option value="어린이보험">어린이보험</option>
+      <option value="연금보험">연금보험</option>
+      <option value="기타">기타</option>
+    </select>
+
+    <label>최근 연락일자</label>
+    <input type="text" id="lastContact" placeholder="YYYY-MM-DD" />
+
+    <label>메모</label>
+    <textarea id="memo" placeholder="상담 내용 또는 특이사항 입력"></textarea>
+
+    <button class="btn-save" onclick="saveCustomer()">고객 저장</button>
+    <button class="back-btn" onclick="history.back()">← 메인</button>
+  </div>
+
+  <script>
+    let selectedGender = "";
+
+    function selectGender(gender) {
+      selectedGender = gender;
+      document.querySelectorAll(".gender-btn").forEach(btn => {
+        btn.classList.remove("active");
+        if (btn.textContent === gender) btn.classList.add("active");
+      });
+    }
+
+    function validateNumber(input) {
+      input.value = input.value.replace(/[^0-9]/g, '');
+    }
+
+    function moveFocus(current, nextId) {
+      if (current.value.length === current.maxLength) {
+        document.getElementById(nextId).focus();
+      }
+    }
+
+    function saveCustomer() {
+      const name = document.getElementById("name").value.trim();
+      const birth = document.getElementById("birth").value;
+      const phone1 = document.getElementById("phone1").value;
+      const phone2 = document.getElementById("phone2").value.trim();
+      const phone3 = document.getElementById("phone3").value.trim();
+      const interest = document.getElementById("interest").value;
+      const lastContact = document.getElementById("lastContact").value;
+      const memo = document.getElementById("memo").value.trim();
+
+      if (!name || !birth || !selectedGender || phone2.length !== 4 || phone3.length !== 4 || !interest || !lastContact) {
+        alert("필수 항목을 올바르게 입력해주세요.");
+        return;
+      }
+
+      const phone = `${phone1}-${phone2}-${phone3}`;
+      const customers = JSON.parse(localStorage.getItem("customers") || "[]");
+
+      const isDuplicate = customers.some(c => c.phone === phone);
+      if (isDuplicate) {
+        alert("이미 등록된 고객입니다.");
+        return;
+      }
+
+      const customer = { name, birth, gender: selectedGender, phone, interest, lastContact, memo };
+      customers.push(customer);
+      localStorage.setItem("customers", JSON.stringify(customers));
+
+      alert("고객 정보가 저장되었습니다!");
+      window.location.href = "index.html";
+    }
+
+    flatpickr("#birth", { dateFormat: "Y-m-d", locale: "ko" });
+    flatpickr("#lastContact", { dateFormat: "Y-m-d", locale: "ko" });
+  </script>
+</body>
+</html>
